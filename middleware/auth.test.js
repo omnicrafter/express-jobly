@@ -8,6 +8,7 @@ const {
   ensureIsAdmin,
   ensureIsAdminOrTheActualUser,
 } = require("./auth");
+const User = require("../models/user");
 
 const { SECRET_KEY } = require("../config");
 const testJwt = jwt.sign({ username: "test", isAdmin: false }, SECRET_KEY);
@@ -100,26 +101,36 @@ describe("ensureIsAdmin", function () {
   });
 });
 
+// Create a mock function for User.get
+jest.mock("../models/user.js", () => {
+  return {
+    get: jest.fn(),
+  };
+});
+
 describe("ensureIsAdminOrTheActualUser", function () {
-  test("works if isAdmin = true", function () {
+  test("works if isAdmin = true", async function () {
+    User.get.mockResolvedValue({ rows: [{ username: "leonardo" }] });
     const req = { params: { username: "leonardo" } };
     const res = { locals: { user: { username: "testAdmin", isAdmin: true } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeFalsy();
     };
-    ensureIsAdminOrTheActualUser(req, res, next);
+    await ensureIsAdminOrTheActualUser(req, res, next);
   });
 
-  test("works if isActualUser", function () {
+  test("works if isActualUser", async function () {
+    User.get.mockResolvedValue({ rows: [{ username: "leonardo" }] });
     const req = { params: { username: "leonardo" } };
     const res = { locals: { user: { username: "leonardo", isAdmin: false } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeFalsy();
     };
-    ensureIsAdminOrTheActualUser(req, res, next);
+    await ensureIsAdminOrTheActualUser(req, res, next);
   });
 
-  test("works if neither Admin nor Actual User", function () {
+  test("works if neither Admin nor Actual User", async function () {
+    User.get.mockResolvedValue({ rows: [{ username: "leonardo" }] });
     const req = { params: { username: "leonardo" } };
     const res = {
       locals: { user: { username: "notleonardo", isAdmin: false } },
@@ -127,6 +138,6 @@ describe("ensureIsAdminOrTheActualUser", function () {
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
-    ensureIsAdminOrTheActualUser(req, res, next);
+    await ensureIsAdminOrTheActualUser(req, res, next);
   });
 });
