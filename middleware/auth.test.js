@@ -74,19 +74,19 @@ describe("ensureLoggedIn", function () {
 });
 
 describe("ensureIsAdmin", function () {
-  test("works if is_admin = true", function () {
+  test("works if isAdmin = true", function () {
     const req = {};
-    const res = { locals: { user: { username: "testAdmin", is_admin: true } } };
+    const res = { locals: { user: { username: "testAdmin", isAdmin: true } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeFalsy();
     };
     ensureIsAdmin(req, res, next);
   });
 
-  test("works if is_admin = false", function () {
+  test("works if isAdmin = false", function () {
     const req = {};
     const res = {
-      locals: { user: { username: "testAdmin", is_admin: false } },
+      locals: { user: { username: "testAdmin", isAdmin: false } },
     };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
