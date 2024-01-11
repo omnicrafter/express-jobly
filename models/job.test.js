@@ -170,3 +170,26 @@ describe("update", function () {
     }
   });
 });
+
+describe("remove", function () {
+  test("works", async function () {
+    const res =
+      await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('test_job', 100, .5, 'c1')
+          RETURNING id`);
+
+    const jobId = res.rows[0].id;
+    await Job.remove(jobId);
+
+    const result = await db.query(`SELECT id FROM jobs WHERE id = ${jobId}`);
+    expect(result.rows.length).toEqual(0);
+  });
+
+  test("works: nonexistent id", async function () {
+    try {
+      const res = await Job.remove(99999999);
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy;
+    }
+  });
+});
