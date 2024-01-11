@@ -90,3 +90,33 @@ describe("findAll", function () {
     ]);
   });
 });
+
+describe("get", function () {
+  test("works: find by id", async function () {
+    const res =
+      await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('test_job', 100, .5, 'c1')
+        RETURNING id`);
+
+    const jobId = res.rows[0].id;
+    let job = await Job.get(jobId);
+
+    expect(job.id).toEqual(jobId);
+
+    expect(job).toEqual({
+      id: expect.any(Number),
+      title: "test_job",
+      salary: 100,
+      equity: "0.5",
+      companyHandle: "c1",
+    });
+  });
+
+  test("works: find nonexistent id", async function () {
+    try {
+      const res = await Job.get(99999999);
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy;
+    }
+  });
+});

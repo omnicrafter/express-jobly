@@ -53,6 +53,22 @@ class Job {
     const jobsRes = await db.query(query);
     return jobsRes.rows;
   }
+
+  static async get(id) {
+    const result = await db.query(
+      `SELECT id,
+        title, salary,
+        equity, company_handle AS "companyHandle"
+        FROM jobs
+        Where id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      throw new NotFoundError(`No job with id: ${id}`);
+    }
+    return result.rows[0];
+  }
 }
 
 module.exports = Job;
