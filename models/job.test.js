@@ -120,3 +120,53 @@ describe("get", function () {
     }
   });
 });
+
+describe("update", function () {
+  test("works", async function () {
+    const res =
+      await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('test_job', 100, .5, 'c1')
+          RETURNING id`);
+
+    const jobId = res.rows[0].id;
+    let job = await Job.update(jobId, { title: "updated_job" });
+
+    expect(job.id).toEqual(jobId);
+
+    expect(job).toEqual({
+      id: expect.any(Number),
+      title: "updated_job",
+      salary: 100,
+      equity: "0.5",
+      companyHandle: "c1",
+    });
+  });
+
+  test("works: null fields", async function () {
+    const res =
+      await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+      VALUES ('test_job', 100, .5, 'c1')
+          RETURNING id`);
+
+    const jobId = res.rows[0].id;
+    let job = await Job.update(jobId, { title: "updated_job", salary: null });
+
+    expect(job.id).toEqual(jobId);
+
+    expect(job).toEqual({
+      id: expect.any(Number),
+      title: "updated_job",
+      salary: null,
+      equity: "0.5",
+      companyHandle: "c1",
+    });
+  });
+
+  test("works: nonexistent id", async function () {
+    try {
+      const res = await Job.update(99999999, { title: "updated_job" });
+    } catch (err) {
+      expect(err instanceof NotFoundError).toBeTruthy;
+    }
+  });
+});
