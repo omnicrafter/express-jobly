@@ -69,3 +69,23 @@ describe("POST /jobs", function () {
     expect(resp.statusCode).toEqual(400);
   });
 });
+
+describe("GET /jobs", function () {
+  test("ok for anon", async function () {
+    db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('newTestJob', 100, 0.1, 'c1')`);
+    const resp = await request(app).get("/jobs");
+    console.log(resp.body);
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: expect.any(Number),
+          title: "newTestJob",
+          salary: 100,
+          equity: "0.1",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+});

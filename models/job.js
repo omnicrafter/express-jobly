@@ -54,10 +54,19 @@ class Job {
   static async findAll() {
     let query = `SELECT id, title, salary, equity, company_handle FROM jobs`;
     const jobsRes = await db.query(query);
-    return jobsRes.rows.map((job) => {
+
+    // Debugging statement to log the result of the database query
+    console.log("jobsRes.rows:", jobsRes.rows);
+
+    const jobs = jobsRes.rows.map((job) => {
       const { company_handle, ...rest } = job;
       return { ...rest, companyHandle: company_handle };
     });
+
+    // Debugging statement to log the result after mapping
+    console.log("jobs:", jobs);
+
+    return jobs;
   }
   // Get a job information by id
 
