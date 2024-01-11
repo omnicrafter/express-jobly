@@ -21,7 +21,7 @@ const router = new express.Router();
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
- * Authorization required: login
+ * Authorization required: login, admin
  */
 
 router.post(
