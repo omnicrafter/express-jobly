@@ -60,3 +60,33 @@ describe("create", function () {
     }
   });
 });
+
+describe("findAll", function () {
+  test("works: no filter", async function () {
+    let jobs = await Job.findAll();
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "job1",
+        salary: 100,
+        equity: "0.1",
+        companyHandle: "c1",
+      },
+      {
+        id: expect.any(Number),
+        title: "job2",
+        salary: 200,
+        equity: "0.2",
+        companyHandle: "c2",
+      },
+      {
+        id: expect.any(Number),
+        title: "job3",
+        salary: 300,
+        equity: "0.3",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+});

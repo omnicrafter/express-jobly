@@ -37,6 +37,22 @@ class Job {
     );
     return result.rows[0];
   }
+
+  /**
+   * Find all jobs.
+  
+   */
+  static async findAll() {
+    let query = `SELECT id,
+                        title,
+                      salary,
+                     equity,
+                      company_handle AS "companyHandle"
+               FROM jobs`;
+
+    const jobsRes = await db.query(query);
+    return jobsRes.rows;
+  }
 }
 
 module.exports = Job;
