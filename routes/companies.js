@@ -57,12 +57,22 @@ router.post(
 
 router.get("/", async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.query, companyFindAllSchema);
+    const { name, minEmployees, maxEmployees } = req.query;
+    const filters = {
+      name,
+      minEmployees:
+        minEmployees !== undefined ? parseInt(minEmployees) : undefined,
+      maxEmployees:
+        maxEmployees !== undefined ? parseInt(maxEmployees) : undefined,
+    };
+
+    const validator = jsonschema.validate(filters, companyFindAllSchema);
     if (!validator.valid) {
       const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
-    const companies = await Company.findAll();
+
+    const companies = await Company.findAll(filters);
     return res.json({ companies });
   } catch (err) {
     return next(err);

@@ -58,12 +58,6 @@ router.post(
 
 router.get("/", async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.query, jobFindAllSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
     const { title, minSalary, hasEquity } = req.query;
 
     const filters = {
@@ -71,6 +65,13 @@ router.get("/", async function (req, res, next) {
       minSalary: minSalary !== undefined ? Number(minSalary) : undefined,
       hasEquity: hasEquity === "true" ? true : false,
     };
+
+    const validator = jsonschema.validate(filters, jobFindAllSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+
     const jobs = await Job.findAll(filters);
     return res.json({ jobs });
   } catch (err) {
