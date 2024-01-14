@@ -109,6 +109,15 @@ describe("register", function () {
 
 describe("findAll", function () {
   test("works", async function () {
+    const testJob = await db.query(`
+    INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('testApplicationJob', 100, 0.1, 'c1')
+    RETURNING id`);
+
+    const testApplication = await db.query(`
+    INSERT INTO applications (username, job_id)
+    VALUES ('u1', ${testJob.rows[0].id})`);
+
     const users = await User.findAll();
     expect(users).toEqual([
       {
@@ -117,6 +126,7 @@ describe("findAll", function () {
         lastName: "U1L",
         email: "u1@email.com",
         isAdmin: false,
+        jobs: [testJob.rows[0].id],
       },
       {
         username: "u2",
@@ -140,6 +150,27 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+    });
+  });
+
+  test("works with applications", async function () {
+    const testJob = await db.query(`
+    INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('testApplicationJob', 100, 0.1, 'c1')
+    RETURNING id`);
+
+    const testApplication = await db.query(`
+    INSERT INTO applications (username, job_id)
+    VALUES ('u1', ${testJob.rows[0].id})`);
+
+    let user = await User.get("u1");
+    expect(user).toEqual({
+      username: "u1",
+      firstName: "U1F",
+      lastName: "U1L",
+      email: "u1@email.com",
+      isAdmin: false,
+      jobs: [testJob.rows[0].id],
     });
   });
 

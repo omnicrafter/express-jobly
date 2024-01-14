@@ -180,6 +180,32 @@ describe("GET /users/:username", function () {
     });
   });
 
+  test("works for users with applications", async function () {
+    const testJob = await db.query(`
+    INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('testApplicationJob', 100, 0.1, 'c1')
+    RETURNING id`);
+
+    const testApplication = await db.query(`
+    INSERT INTO applications (username, job_id)
+    VALUES ('u1', ${testJob.rows[0].id})`);
+
+    const resp = await request(app)
+      .get(`/users/u1`)
+      .set("authorization", `Bearer ${u1Token}`);
+
+    expect(resp.body).toEqual({
+      user: {
+        username: "u1",
+        firstName: "U1F",
+        lastName: "U1L",
+        email: "user1@user.com",
+        isAdmin: false,
+        jobs: [testJob.rows[0].id],
+      },
+    });
+  });
+
   test("unauth for anon", async function () {
     const resp = await request(app).get(`/users/u1`);
     expect(resp.statusCode).toEqual(401);

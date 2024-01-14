@@ -102,14 +102,23 @@ class User {
 
   static async findAll() {
     const result = await db.query(
-      `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           ORDER BY username`
+      `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin",
+                  COALESCE(array_agg(a.job_id) FILTER (WHERE a.job_id IS NOT NULL), ARRAY[]::INTEGER[]) AS "jobs"
+           FROM users AS u
+           LEFT JOIN applications AS a ON u.username = a.username
+           GROUP BY u.username, u.first_name, u.last_name, u.email, u.is_admin
+           ORDER BY u.username`
     );
+
+    const cleanResult = result.rows.map((row) => {
+      if (row.jobs.length === 0) {
+        delete row.jobs;
+      }
+    });
 
     return result.rows;
   }
@@ -123,20 +132,36 @@ class User {
    **/
 
   static async get(username) {
-    const userRes = await db.query(
-      `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+    const userExist = await db.query(
+      `
+    SELECT username
+    FROM users
+    WHERE username = $1`,
       [username]
     );
 
-    const user = userRes.rows[0];
+    if (userExist.rows.length === 0)
+      throw new NotFoundError(`No user: ${username}`);
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    const userRes = await db.query(
+      `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin",
+                  COALESCE(array_agg(a.job_id) FILTER (WHERE a.job_id IS NOT NULL), ARRAY[]::INTEGER[]) AS "jobs"
+           FROM users AS u
+            LEFT JOIN applications AS a ON u.username = a.username
+           WHERE u.username = $1
+           GROUP BY u.username, u.first_name, u.last_name, u.email, u.is_admin`,
+      [username]
+    );
+
+    if (userRes.rows[0].jobs.length === 0) {
+      delete userRes.rows[0].jobs;
+    }
+
+    const user = userRes.rows[0];
 
     return user;
   }
