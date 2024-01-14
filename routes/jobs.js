@@ -58,7 +58,14 @@ router.post(
 
 router.get("/", async function (req, res, next) {
   try {
-    const jobs = await Job.findAll();
+    const { title, minSalary, hasEquity } = req.query;
+
+    const filters = {
+      title,
+      minSalary: minSalary !== undefined ? Number(minSalary) : undefined,
+      hasEquity: hasEquity === "true" ? true : false,
+    };
+    const jobs = await Job.findAll(filters);
     return res.json({ jobs });
   } catch (err) {
     return next(err);
