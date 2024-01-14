@@ -49,6 +49,12 @@ class Job {
 
   /**
    * Find all jobs.
+   * 
+   * @param {Object} filters - Optional filtering criteria.
+   * @param {string} filters.title - Job title must contain this string.
+   * @param {number} filters.minSalary - Job must have at least this salary.
+   * @param {boolean} filters.hasEquity - Job must have equity > 0.
+   * 
   
    */
   static async findAll(filters = {}) {
