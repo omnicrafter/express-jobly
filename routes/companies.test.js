@@ -136,6 +136,8 @@ describe("GET /companies", function () {
 
 describe("GET /companies/:handle", function () {
   test("works for anon", async function () {
+    await db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('newTestJob', 100, 0.1, 'c1')`);
     const resp = await request(app).get(`/companies/c1`);
     expect(resp.body).toEqual({
       company: {
@@ -144,6 +146,14 @@ describe("GET /companies/:handle", function () {
         description: "Desc1",
         numEmployees: 1,
         logoUrl: "http://c1.img",
+        jobs: [
+          {
+            id: expect.any(Number),
+            title: "newTestJob",
+            salary: 100,
+            equity: "0.1",
+          },
+        ],
       },
     });
   });
