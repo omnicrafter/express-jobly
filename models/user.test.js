@@ -214,8 +214,7 @@ describe("update", function () {
 describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+    const res = await db.query("SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -226,5 +225,41 @@ describe("remove", function () {
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
     }
+  });
+});
+
+/*************************************** apply */
+describe("apply", function () {
+  test("works", async function () {
+    const newJob = await db.query(`INSERT INTO jobs
+    (title, salary, equity, company_handle)
+    VALUES ('testApplicationjob', 100, 0.1, 'c1')
+    RETURNING id`);
+    console.log(newJob.rows[0]);
+
+    const JobId = newJob.rows[0].id;
+
+    const newApplication = {
+      username: "u1",
+      jobId: JobId,
+    };
+
+    const application = await User.apply(
+      newApplication.username,
+      newApplication.jobId
+    );
+
+    const result = await db.query(
+      `SELECT username, job_id
+            FROM applications
+            WHERE username = 'u1' 
+            AND job_id = ${JobId}`
+    );
+    expect(result.rows).toEqual([
+      {
+        username: "u1",
+        job_id: JobId,
+      },
+    ]);
   });
 });

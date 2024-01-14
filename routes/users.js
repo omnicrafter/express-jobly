@@ -137,4 +137,20 @@ router.delete(
   }
 );
 
+/** Apply for a job */
+
+router.get(
+  "/:username/jobs/:id",
+  ensureIsAdminOrTheActualUser,
+  async function (req, res, next) {
+    try {
+      const { username, id } = req.params;
+      await User.apply(username, id);
+      return res.json({ applied: id });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 module.exports = router;
