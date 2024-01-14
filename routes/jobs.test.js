@@ -75,7 +75,7 @@ describe("GET /jobs", function () {
     db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
     VALUES ('newTestJob', 100, 0.1, 'c1')`);
     const resp = await request(app).get("/jobs");
-    console.log(resp.body);
+
     expect(resp.body).toEqual({
       jobs: [
         {
@@ -83,6 +83,25 @@ describe("GET /jobs", function () {
           title: "newTestJob",
           salary: 100,
           equity: "0.1",
+          companyHandle: "c1",
+        },
+      ],
+    });
+  });
+
+  test("title filter works", async function () {
+    db.query(`INSERT INTO jobs (title, salary, equity, company_handle)
+    VALUES ('newTestTitleJob', 100, 0.2, 'c1')`);
+
+    const resp = await request(app).get("/jobs?title=newt");
+
+    expect(resp.body).toEqual({
+      jobs: [
+        {
+          id: expect.any(Number),
+          title: "newTestTitleJob",
+          salary: 100,
+          equity: "0.2",
           companyHandle: "c1",
         },
       ],
