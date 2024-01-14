@@ -22,10 +22,17 @@ class Application {
       `INSERT INTO applications
             (username, job_id) 
             VALUES ($1, $2) 
-            RETURNING username, job_id AS jobId`,
+            RETURNING username, job_id`,
       [username, jobId]
     );
 
-    return result.rows[0];
+    const response = result.rows[0];
+    response.jobId = response.job_id;
+
+    const { job_id, ...newResponse } = response;
+
+    return newResponse;
   }
 }
+
+module.exports = Application;
