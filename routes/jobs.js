@@ -11,7 +11,7 @@ const Job = require("../models/job");
 
 const jobNewSchema = require("../schemas/jobNewSchema.json");
 const jobUpdateSchema = require("../schemas/jobUpdateSchema.json");
-// const jobFindAllSchema = require("../schemas/jobFindAll.json");
+const jobFindAllSchema = require("../schemas/jobFindAllSchema.json");
 
 const router = new express.Router();
 
@@ -58,6 +58,12 @@ router.post(
 
 router.get("/", async function (req, res, next) {
   try {
+    const validator = jsonschema.validate(req.query, jobFindAllSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+
     const { title, minSalary, hasEquity } = req.query;
 
     const filters = {
