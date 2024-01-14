@@ -51,12 +51,32 @@ class Job {
    * Find all jobs.
   
    */
-  static async findAll() {
+  static async findAll(filters = {}) {
     let query = `SELECT id, title, salary, equity, company_handle FROM jobs`;
-    const jobsRes = await db.query(query);
+    let whereExpressions = [];
+    let queryValues = [];
 
-    // Debugging statement to log the result of the database query
-    console.log("jobsRes.rows:", jobsRes.rows);
+    const { title, minSalary, hasEquity } = filters;
+
+    if (title) {
+      queryValues.push(`%${title}%`);
+      whereExpressions.push(`title ILIKE $${queryValues.length}`);
+    }
+
+    if (minSalary !== undefined) {
+      queryValues.push(minSalary);
+      whereExpressions.push(`salary >= $${queryValues.length}`);
+    }
+
+    if (hasEquity === true) {
+      whereExpressions.push(`equity > 0`);
+    }
+
+    if (whereExpressions.length > 0) {
+      query += " WHERE " + whereExpressions.join(" AND ");
+    }
+
+    const jobsRes = await db.query(query, queryValues);
 
     const jobs = jobsRes.rows.map((job) => {
       const { company_handle, ...rest } = job;

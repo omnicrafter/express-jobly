@@ -89,6 +89,101 @@ describe("findAll", function () {
       },
     ]);
   });
+
+  test("works: title filter", async function () {
+    let jobs = await Job.findAll({ title: "job" });
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "job1",
+        salary: 100,
+        equity: "0.1",
+        companyHandle: "c1",
+      },
+      {
+        id: expect.any(Number),
+        title: "job2",
+        salary: 200,
+        equity: "0.2",
+        companyHandle: "c2",
+      },
+      {
+        id: expect.any(Number),
+        title: "job3",
+        salary: 300,
+        equity: "0.3",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("works: minSalary filter", async function () {
+    let jobs = await Job.findAll({ minSalary: 150 });
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "job2",
+        salary: 200,
+        equity: "0.2",
+        companyHandle: "c2",
+      },
+      {
+        id: expect.any(Number),
+        title: "job3",
+        salary: 300,
+        equity: "0.3",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("works: hasEquity filter", async function () {
+    let jobs = await Job.findAll({ hasEquity: true });
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "job1",
+        salary: 100,
+        equity: "0.1",
+        companyHandle: "c1",
+      },
+      {
+        id: expect.any(Number),
+        title: "job2",
+        salary: 200,
+        equity: "0.2",
+        companyHandle: "c2",
+      },
+      {
+        id: expect.any(Number),
+        title: "job3",
+        salary: 300,
+        equity: "0.3",
+        companyHandle: "c3",
+      },
+    ]);
+  });
+
+  test("works: has all filters", async function () {
+    let jobs = await Job.findAll({
+      title: "job",
+      minSalary: 220,
+      hasEquity: true,
+    });
+
+    expect(jobs).toEqual([
+      {
+        id: expect.any(Number),
+        title: "job3",
+        salary: 300,
+        equity: "0.3",
+        companyHandle: "c3",
+      },
+    ]);
+  });
 });
 
 describe("get", function () {
