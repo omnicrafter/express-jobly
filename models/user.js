@@ -203,19 +203,30 @@ class User {
   }
 
   static async apply(username, jobId) {
-    // Check if username with jobId exists
+    // Make sure jobId exists
+    const jobIdCheck = await db.query(
+      `SELECT id
+      FROM jobs 
+      WHERE id = $1`,
+      [jobId]
+    );
+
+    if (!jobIdCheck.rows[0]) {
+      throw new NotFoundError(`No job with id: ${jobId}`);
+    }
+    // Check if the application already exists
     const applicationCheck = await db.query(
       `SELECT username, job_id 
               FROM applications
               WHERE username = $1 AND job_id = $2`,
       [username, jobId]
     );
+
     if (applicationCheck.rows[0]) {
       throw new BadRequestError(
         `Application already exists: ${username}, ${jobId}`
       );
     }
-
     const result = await db.query(
       `INSERT INTO applications
               (username, job_id) 

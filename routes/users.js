@@ -139,14 +139,17 @@ router.delete(
 
 /** Apply for a job */
 
-router.get(
+router.post(
   "/:username/jobs/:id",
+  ensureLoggedIn,
   ensureIsAdminOrTheActualUser,
   async function (req, res, next) {
     try {
       const { username, id } = req.params;
-      await User.apply(username, id);
-      return res.json({ applied: id });
+
+      const result = await User.apply(username, id);
+
+      return res.json({ applied: result.jobId });
     } catch (err) {
       return next(err);
     }

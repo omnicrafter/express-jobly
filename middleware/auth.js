@@ -56,6 +56,7 @@ async function ensureIsAdminOrTheActualUser(req, res, next) {
   try {
     // Check if user exists in DB. If not, User.get() will throw a NotFoundError.
     await User.get(req.params.username);
+
     if (
       !res.locals.user.isAdmin &&
       res.locals.user.username !== req.params.username

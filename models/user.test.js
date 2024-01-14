@@ -233,7 +233,7 @@ describe("apply", function () {
   test("works", async function () {
     const newJob = await db.query(`INSERT INTO jobs
     (title, salary, equity, company_handle)
-    VALUES ('testApplicationjob', 100, 0.1, 'c1')
+    VALUES ('testApplicationJob', 100, 0.1, 'c1')
     RETURNING id`);
     console.log(newJob.rows[0]);
 

@@ -284,3 +284,52 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 });
+
+/************************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for users", async function () {
+    const newJob = await db.query(`INSERT INTO jobs
+    (title, salary, equity, company_handle)
+    VALUES ('testApplicationJob', 100, 0.1, 'c1')
+    RETURNING id`);
+
+    const newJobId = newJob.rows[0].id;
+
+    const resp = await request(app)
+      .post(`/users/u1/jobs/${newJobId}`)
+      .set("authorization", `Bearer ${u1Token}`);
+
+    expect(resp.body).toEqual({ applied: newJobId });
+  });
+
+  test("unauth for anon", async function () {
+    await db.query(`DELETE FROM applications`);
+
+    const newJob = await db.query(`INSERT INTO jobs
+    (title, salary, equity, company_handle)
+    VALUES ('testApplicationjob', 100, 0.1, 'c1')
+    RETURNING id`);
+
+    const newJobId = newJob.rows[0].id;
+
+    const resp = await request(app).post(`/users/u1/jobs/${newJobId}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if user missing", async function () {
+    await db.query(`DELETE FROM applications`);
+
+    const resp = await request(app)
+      .post(`/users/nope/jobs/1`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("not found if job missing", async function () {
+    const resp = await request(app)
+      .post(`/users/u1/jobs/99999`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+});
